@@ -1,2 +1,2 @@
 # saur8-timer-bypass
- Bypass timers on specified domains
+A simple Chrome Extension to bypass timers on specified domains
