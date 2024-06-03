@@ -31,8 +31,6 @@ function updateTab(tabId) {
   });
 }
 
-// Previous code remains the same...
-
 function injectBypassCode(domains) {
   const currentDomain = window.location.hostname;
   if (domains.some(domain => currentDomain.includes(domain))) {
@@ -116,13 +114,17 @@ function injectBypassCode(domains) {
 
         // Function to update visible timer elements
         function updateVisibleTimers() {
-          const elements = document.getElementsByTagName('*');
+          const elements = document.querySelectorAll('[id*="timer"], [class*="timer"], [id*="countdown"], [class*="countdown"]');
           for (const el of elements) {
             if (el.innerText && el.innerText.match(/^\\d{1,2}[:.\\s]?\\d{2}$/)) {
               const text = el.innerText;
               const newText = '0:00';
               if (text !== newText) {
                 el.innerText = newText;
+                // If changing the text doesn't work, try setting innerHTML
+                if (el.innerText !== newText) {
+                  el.innerHTML = newText;
+                }
               }
             }
           }
@@ -130,20 +132,6 @@ function injectBypassCode(domains) {
 
         // Run updateVisibleTimers every 100ms
         realSetInterval(updateVisibleTimers, 100);
-
-        // Also try to click any "Skip" or similar buttons
-        function clickSkipButtons() {
-          const buttons = document.querySelectorAll('button, .button, .btn, a');
-          for (const button of buttons) {
-            const text = button.innerText.toLowerCase();
-            if (text.includes('skip') || text.includes('next') || text.includes('continue')) {
-              button.click();
-            }
-          }
-        }
-
-        // Try clicking buttons every 500ms
-        realSetInterval(clickSkipButtons, 500);
 
         console.log('Timers bypassed on', '${currentDomain}');
       })();
