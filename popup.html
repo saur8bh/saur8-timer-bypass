@@ -5,12 +5,15 @@
   <style>
     body { width: 300px; padding: 10px; }
     textarea { width: 100%; height: 200px; }
+    input[type="text"] { width: 100%; margin-top: 10px; }
   </style>
 </head>
 <body>
   <h3>Enter domains to bypass timers (one per line):</h3>
   <textarea id="domains"></textarea><br>
-  <button id="save">Save Domains</button>
+  <h3>Enter URL patterns (separated by commas):</h3>
+  <input type="text" id="urlPatterns" placeholder="example1.com,example2.com"><br>
+  <button id="save">Save</button>
   <p id="status"></p>
   <script src="popup.js"></script>
 </body>

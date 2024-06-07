@@ -1,6 +1,6 @@
-// Listen for domain updates from popup
+// Listen for settings updates from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "domainsUpdated") {
+  if (request.action === "settingsUpdated") {
     updateAllTabs();
   }
 });
@@ -8,26 +8,38 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Listen for new page loads
 chrome.webNavigation.onCommitted.addListener((details) => {
   if (details.frameId === 0) { // Main frame only
-    updateTab(details.tabId);
+    updateTab(details.tabId, details.url);
   }
 });
 
 function updateAllTabs() {
   chrome.tabs.query({}, (tabs) => {
-    tabs.forEach(tab => updateTab(tab.id));
+    tabs.forEach(tab => updateTab(tab.id, tab.url));
   });
 }
 
-function updateTab(tabId) {
-  chrome.storage.local.get(['bypassDomains'], (result) => {
+function updateTab(tabId, url) {
+  chrome.storage.local.get(['bypassDomains', 'urlPatterns'], (result) => {
     const domains = result.bypassDomains ? result.bypassDomains.split('\n').map(d => d.trim()).filter(Boolean) : [];
-    
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      func: injectBypassCode,
-      args: [domains],
-      world: "MAIN" // This ensures the script runs in the page's context
-    });
+    const urlPatterns = result.urlPatterns ? result.urlPatterns.split(',').map(u => u.trim()).filter(Boolean) : [];
+
+    // Debugging: log the retrieved settings
+    console.log('Retrieved domains:', domains);
+    console.log('Retrieved URL patterns:', urlPatterns);
+    console.log('Current URL:', url);
+
+    // Check if the URL is defined and matches any of the specified patterns
+    if (url && urlPatterns.some(pattern => url.includes(pattern))) {
+      console.log('URL matches patterns, injecting bypass code...');
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        func: injectBypassCode,
+        args: [domains],
+        world: "MAIN" // This ensures the script runs in the page's context
+      });
+    } else {
+      console.log('URL does not match any patterns.');
+    }
   });
 }
 
